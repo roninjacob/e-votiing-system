@@ -1,0 +1,547 @@
+/* ═══════════════════════════════════════════════════════════════════
+   CICS E-Voting System — BatStateU Arasof Campus Theme
+   CICS Teal Palette (College of Informatics and Computing Sciences)
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root {
+    --dark-bg:      #061a18;
+    --sidebar-bg:   #071e1c;
+    --sidebar-w:    220px;
+    --gold:         #26c6bc;
+    --gold-dark:    #1da89f;
+    --teal-light:   #26c6bc;
+    --teal-mid:     #1da89f;
+    --teal-dark:    #0d6b65;
+    --teal-slate:   #3d8f8a;
+    --red:          #c0392b;
+    --card-bg:      rgba(38,198,188,0.07);
+    --card-border:  rgba(38,198,188,0.20);
+    --text-light:   #e0faf8;
+    --text-muted:   #6ec9c4;
+}
+
+/* ── Base ── */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #061a18;
+    background-image: url('../img/batstate-background.png');
+    background-size: cover;
+    background-position: center center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    color: var(--text-light);
+    min-height: 100vh;
+}
+
+/* Dark overlay so text stays readable over the seal */
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: rgba(4, 18, 16, 0.85);
+    z-index: 0;
+    pointer-events: none;
+}
+
+.top-banner, .app-layout, footer, .login-page > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* ── Top Banner ── */
+.top-banner {
+    background: linear-gradient(90deg, var(--teal-dark) 0%, #061a18 50%, var(--teal-dark) 100%);
+    padding: 10px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 3px solid var(--teal-light);
+}
+.top-banner .banner-title {
+    font-size: 1.15rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: #fff;
+    text-transform: uppercase;
+    text-align: center;
+    flex: 1;
+}
+.top-banner img.logo {
+    height: 52px;
+    width: auto;
+    object-fit: contain;
+}
+.top-banner .logos-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* ── Layout ── */
+.app-layout {
+    display: flex;
+    min-height: calc(100vh - 80px);
+}
+
+/* ── Sidebar ── */
+.sidebar {
+    width: var(--sidebar-w);
+    background: rgba(6, 26, 24, 0.94);
+    backdrop-filter: blur(12px);
+    border-right: 1px solid rgba(38,198,188,0.15);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+}
+.sidebar-user {
+    padding: 20px 16px 16px;
+    border-bottom: 1px solid rgba(38,198,188,0.15);
+}
+.sidebar-user .cics-badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+.sidebar-user .cics-badge .cics-icon {
+    width: 42px; height: 42px;
+    background: var(--teal-mid);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 900; font-size: .85rem; color: #fff;
+}
+.sidebar-user .welcome-name {
+    font-size: .95rem;
+    font-weight: 700;
+    color: #fff;
+    text-transform: uppercase;
+}
+.sidebar-user .student-id {
+    font-size: .75rem;
+    color: var(--text-muted);
+}
+.sidebar-nav { flex: 1; padding: 8px 0; }
+.sidebar-nav a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 20px;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: .85rem;
+    font-weight: 500;
+    letter-spacing: .3px;
+    transition: background .15s, color .15s;
+    border-left: 3px solid transparent;
+}
+.sidebar-nav a:hover,
+.sidebar-nav a.active {
+    background: rgba(38,198,188,.12);
+    color: var(--teal-light);
+    border-left-color: var(--teal-light);
+}
+.sidebar-nav a i { font-size: 1rem; width: 18px; text-align: center; }
+.sidebar-nav .nav-section {
+    font-size: .65rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--teal-slate);
+    padding: 14px 20px 4px;
+}
+
+/* ── Main Content ── */
+.main-content {
+    flex: 1;
+    padding: 24px;
+    overflow-x: hidden;
+    position: relative;
+    z-index: 1;
+}
+
+/* ── Page Header ── */
+.page-header {
+    margin-bottom: 20px;
+}
+.page-header h2 {
+    font-size: 1.4rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #fff;
+    margin: 0 0 2px;
+}
+.election-status-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: .8rem;
+}
+.status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--gold);
+    animation: pulse 1.5s infinite;
+}
+@keyframes pulse {
+    0%,100% { opacity: 1; }
+    50%      { opacity: .3; }
+}
+.status-label { color: var(--gold); font-weight: 700; text-transform: uppercase; }
+.status-timer { color: var(--text-muted); }
+
+/* ── Stat Cards ── */
+.stat-card {
+    background: rgba(6, 26, 24, 0.82);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+.stat-card .stat-icon {
+    width: 46px; height: 46px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+}
+.stat-card .stat-value { font-size: 1.6rem; font-weight: 800; color: #fff; line-height: 1; }
+.stat-card .stat-label { font-size: .75rem; color: var(--text-muted); margin-top: 2px; }
+
+/* ── Dark Cards ── */
+.dark-card {
+    background: rgba(6, 26, 24, 0.82);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    overflow: hidden;
+}
+.dark-card .card-head {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--card-border);
+    font-size: .8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    color: var(--text-muted);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.dark-card .card-body-inner { padding: 18px; }
+
+/* ── Tables ── */
+.dark-table { width: 100%; border-collapse: collapse; }
+.dark-table th {
+    font-size: .7rem;
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    color: var(--text-muted);
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--card-border);
+    font-weight: 600;
+}
+.dark-table td {
+    padding: 11px 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-size: .85rem;
+    color: var(--text-light);
+    vertical-align: middle;
+}
+.dark-table tbody tr:hover { background: rgba(255,255,255,0.04); }
+.dark-table tbody tr:last-child td { border-bottom: none; }
+
+/* ── Badges ── */
+.badge-status {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: .7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+}
+.badge-draft      { background: rgba(150,150,150,.2); color: #aaa; }
+.badge-configured { background: rgba(13,110,253,.2);  color: #6ea8fe; }
+.badge-open       { background: rgba(25,200,100,.2);  color: #5dde8a; }
+.badge-closed     { background: rgba(38,198,188,.2);  color: var(--teal-light); }
+.badge-published  { background: rgba(100,200,255,.2); color: #7dd3fc; }
+
+/* ── Buttons ── */
+.btn-gold {
+    background: var(--teal-mid);
+    color: #fff;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: .85rem;
+    cursor: pointer;
+    transition: background .15s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.btn-gold:hover { background: var(--teal-dark); color: #fff; }
+
+.btn-red {
+    background: var(--red);
+    color: #fff;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: .85rem;
+    cursor: pointer;
+    transition: background .15s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.btn-red:hover { background: #a93226; color: #fff; }
+
+.btn-ghost {
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--card-border);
+    padding: 7px 16px;
+    border-radius: 6px;
+    font-size: .82rem;
+    cursor: pointer;
+    transition: all .15s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.btn-ghost:hover { border-color: var(--teal-light); color: var(--teal-light); }
+
+.btn-sm-icon {
+    background: transparent;
+    border: 1px solid var(--card-border);
+    color: var(--text-muted);
+    width: 30px; height: 30px;
+    border-radius: 6px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: .8rem;
+    cursor: pointer;
+    transition: all .15s;
+    text-decoration: none;
+}
+.btn-sm-icon:hover { border-color: var(--teal-light); color: var(--teal-light); }
+.btn-sm-icon.danger:hover { border-color: #e74c3c; color: #e74c3c; }
+
+/* ── Forms ── */
+.form-label-dark {
+    font-size: .78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    display: block;
+}
+.form-control-dark {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--card-border);
+    border-radius: 6px;
+    color: #fff;
+    padding: 9px 12px;
+    font-size: .88rem;
+    width: 100%;
+    transition: border-color .15s;
+}
+.form-control-dark:focus {
+    outline: none;
+    border-color: var(--teal-light);
+    background: rgba(38,198,188,0.07);
+    color: #fff;
+}
+.form-control-dark option { background: #061a18; }
+
+/* ── Candidate Cards (Ballot) ── */
+.candidate-card {
+    cursor: pointer;
+    background: rgba(255,255,255,0.05);
+    border: 2px solid rgba(255,255,255,0.1) !important;
+    border-radius: 10px;
+    transition: all .15s;
+    user-select: none;
+    color: var(--text-light);
+}
+.candidate-card:hover {
+    border-color: var(--teal-light) !important;
+    background: rgba(38,198,188,0.08);
+}
+.candidate-card.selected {
+    border-color: var(--teal-light) !important;
+    background: rgba(38,198,188,0.15);
+    box-shadow: 0 0 0 3px rgba(38,198,188,.25);
+}
+.candidate-card.disabled {
+    opacity: .4;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+.candidate-photo-sm {
+    width: 64px; height: 64px;
+    object-fit: cover;
+    border: 2px solid var(--teal-light);
+}
+.candidate-photo { height: 140px; object-fit: cover; }
+.candidate-photo-placeholder { height: 140px; background: rgba(255,255,255,0.05); }
+
+/* ── Activity Feed ── */
+.feed-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-size: .8rem;
+}
+.feed-item:last-child { border-bottom: none; }
+.feed-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    margin-top: 4px;
+    flex-shrink: 0;
+}
+.feed-dot.gold   { background: var(--gold); }
+.feed-dot.green  { background: #2ecc71; }
+.feed-dot.red    { background: #e74c3c; }
+.feed-text { color: var(--text-light); }
+.feed-time { color: var(--text-muted); font-size: .72rem; }
+
+/* ── Voter Turnout Gauge ── */
+.turnout-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 0;
+}
+.turnout-pct {
+    font-size: 2.8rem;
+    font-weight: 900;
+    color: #fff;
+    line-height: 1;
+}
+.turnout-sub { font-size: .75rem; color: var(--text-muted); margin-top: 4px; }
+
+/* ── Progress Bars ── */
+.prog-row { margin-bottom: 10px; }
+.prog-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: .78rem;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+}
+.prog-bar-track {
+    height: 8px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 4px;
+    overflow: hidden;
+}
+.prog-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--teal-mid), var(--teal-light));
+    border-radius: 4px;
+    transition: width .6s ease;
+}
+
+/* ── Confirm Modal ── */
+.modal-dark .modal-content {
+    background: #061a18;
+    border: 1px solid var(--card-border);
+    color: var(--text-light);
+}
+.modal-dark .modal-header {
+    border-bottom: 1px solid var(--card-border);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+.modal-dark .modal-footer { border-top: 1px solid var(--card-border); }
+.modal-dark .modal-title { color: #fff; font-size: 1rem; }
+.modal-dark .btn-close { filter: invert(1); }
+
+/* ── Flash Alerts ── */
+.flash-wrap { margin-bottom: 16px; }
+.flash-wrap .alert {
+    border-radius: 8px;
+    font-size: .85rem;
+    border: none;
+}
+
+/* ── Login Page ── */
+.login-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-image: url('../img/batstate-background.png');
+    background-size: cover;
+    background-position: center center;
+}
+.login-page::before {
+    background: rgba(4, 18, 16, 0.15);
+}
+.login-banner {
+    background: linear-gradient(90deg, var(--teal-dark) 0%, #061a18 50%, var(--teal-dark) 100%);
+    padding: 12px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 3px solid var(--teal-light);
+}
+.login-banner .logos-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.login-banner .banner-title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: #fff;
+    text-transform: uppercase;
+    text-align: center;
+    flex: 1;
+}
+.login-card {
+    background: rgba(6, 22, 20, 0.90);
+    border: 1px solid var(--card-border);
+    border-radius: 14px;
+    padding: 36px 32px;
+    width: 100%;
+    max-width: 420px;
+    backdrop-filter: blur(16px);
+    box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+}
+.login-card h3 {
+    font-size: 1.1rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #fff;
+    margin-bottom: 4px;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--dark-bg); }
+::-webkit-scrollbar-thumb { background: var(--teal-dark); border-radius: 3px; }
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+    .sidebar { width: 100%; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .app-layout { flex-direction: column; }
+    .top-banner .banner-title { font-size: .85rem; }
+}
