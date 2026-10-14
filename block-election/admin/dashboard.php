@@ -47,171 +47,102 @@ $auditLog = db()->query(
 $totalVoters = db()->query("SELECT COUNT(*) FROM users WHERE role='voter' AND is_active=1")->fetchColumn();
 $totalVoted  = db()->query("SELECT COUNT(DISTINCT voter_id) FROM block_votes WHERE status='confirmed'")->fetchColumn();
 $turnoutPct  = $totalVoters > 0 ? round(($totalVoted / $totalVoters) * 100) : 0;
+$ringPct = max(0, min(100, $turnoutPct));
+$recentElections = array_slice($elections, 0, 6);
+$dashboardDate = new DateTimeImmutable('now', new DateTimeZone('Asia/Manila'));
 
 $pageTitle = 'Election Overview';
 require_once dirname(__DIR__) . '/includes/header.php';
 ?>
 
-<!-- Page Header -->
-<div class="page-header">
-    <h2>Live Election Overview</h2>
-    <div class="election-status-bar">
-        <?php if ($stats['open'] > 0): ?>
-        <div class="status-dot"></div>
-        <span class="status-label">Election in Progress</span>
-        <span class="status-timer">| <?= $stats['open'] ?> active election<?= $stats['open'] > 1 ? 's' : '' ?></span>
-        <?php else: ?>
-        <span class="status-label" style="color:var(--text-muted);">No Active Elections</span>
-        <?php endif; ?>
-    </div>
-</div>
+<div class="dashboard-topline"><span><i class="bi bi-grid" aria-hidden="true"></i> Workspace <span>/</span> Election overview</span><time datetime="<?= $dashboardDate->format('Y-m-d') ?>"><?= $dashboardDate->format('M d, Y') ?></time></div>
 
-<!-- Stat Cards -->
-<div class="row g-3 mb-4">
-    <?php
-    $cards = [
-        ['label'=>'Total Elections', 'value'=>$stats['total'],     'icon'=>'bi-ballot',        'bg'=>'rgba(240,165,0,.15)',   'color'=>'#f0a500'],
-        ['label'=>'Open',            'value'=>$stats['open'],      'icon'=>'bi-unlock-fill',   'bg'=>'rgba(46,204,113,.15)', 'color'=>'#2ecc71'],
-        ['label'=>'Draft',           'value'=>$stats['draft'],     'icon'=>'bi-pencil-square', 'bg'=>'rgba(150,150,150,.15)','color'=>'#aaa'],
-        ['label'=>'Published',       'value'=>$stats['published'], 'icon'=>'bi-check-circle',  'bg'=>'rgba(100,200,255,.15)','color'=>'#7dd3fc'],
-    ];
-    foreach ($cards as $c): ?>
-    <div class="col-6 col-md-3">
-        <div class="stat-card">
-            <div class="stat-icon" style="background:<?= $c['bg'] ?>;color:<?= $c['color'] ?>;">
-                <i class="bi <?= $c['icon'] ?>"></i>
-            </div>
-            <div>
-                <div class="stat-value"><?= $c['value'] ?></div>
-                <div class="stat-label"><?= $c['label'] ?></div>
-            </div>
-        </div>
+<section class="dashboard-hero">
+    <div class="dashboard-hero-content">
+        <span class="dashboard-eyebrow">ELECTION MANAGEMENT</span>
+        <h1>Your campus, <em>at a glance.</em></h1>
+        <p>Welcome back, <?= h(explode(' ', trim($user['full_name']))[0]) ?>. Here is what is happening across your elections.</p>
+        <span class="dashboard-live-pill"><span class="<?= $stats['open'] > 0 ? 'is-live' : '' ?>" aria-hidden="true"></span><?= $stats['open'] > 0 ? $stats['open'] . ' election' . ($stats['open'] > 1 ? 's' : '') . ' open for voting' : 'No elections currently open' ?></span>
     </div>
+    <div class="dashboard-hero-actions">
+        <a class="dashboard-button" href="<?= BASE_URL ?>/admin/election_form.php"><i class="bi bi-plus-lg" aria-hidden="true"></i> New election</a>
+        <a class="dashboard-button dashboard-button--outline" href="<?= BASE_URL ?>/admin/elections.php">Manage elections <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+    </div>
+</section>
+
+<div class="dashboard-stats">
+    <?php $cards = [
+        ['label'=>'Total elections', 'value'=>$stats['total'], 'icon'=>'bi-stack', 'tone'=>'teal', 'note'=>'Across all blocks'],
+        ['label'=>'Open for voting', 'value'=>$stats['open'], 'icon'=>'bi-broadcast', 'tone'=>'green', 'note'=>'Accepting ballots'],
+        ['label'=>'In draft', 'value'=>$stats['draft'], 'icon'=>'bi-pencil-square', 'tone'=>'amber', 'note'=>'Being prepared'],
+        ['label'=>'Published', 'value'=>$stats['published'], 'icon'=>'bi-patch-check', 'tone'=>'blue', 'note'=>'Results released'],
+    ]; foreach ($cards as $card): ?>
+    <article class="dashboard-stat">
+        <div class="dashboard-stat-top"><span><?= $card['label'] ?></span><span class="dashboard-icon dashboard-icon--<?= $card['tone'] ?>"><i class="bi <?= $card['icon'] ?>" aria-hidden="true"></i></span></div>
+        <strong><?= number_format((int) $card['value']) ?></strong><small><?= $card['note'] ?></small>
+    </article>
     <?php endforeach; ?>
 </div>
 
-<div class="row g-4">
-    <!-- Left: Voter Turnout + Block Breakdown -->
-    <div class="col-lg-5">
-        <div class="dark-card mb-4">
-            <div class="card-head">Voter Turnout</div>
-            <div class="card-body-inner">
-                <div class="turnout-wrap mb-3">
-                    <div class="turnout-pct"><?= $turnoutPct ?>%</div>
-                    <div class="turnout-sub"><?= number_format((int)$totalVoted) ?> of <?= number_format((int)$totalVoters) ?> votes cast</div>
-                </div>
-                <!-- SVG arc gauge -->
-                <div class="text-center mb-2">
-                    <svg width="160" height="90" viewBox="0 0 160 90">
-                        <path d="M10,80 A70,70 0 0,1 150,80" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="14" stroke-linecap="round"/>
-                        <?php
-                        $angle = min($turnoutPct / 100, 1);
-                        $rad   = M_PI * $angle;
-                        $ex    = 80 - 70 * cos($rad);
-                        $ey    = 80 - 70 * sin($rad);
-                        $large = $angle > 0.5 ? 1 : 0;
-                        if ($turnoutPct > 0):
-                        ?>
-                        <path d="M10,80 A70,70 0 <?= $large ?>,1 <?= round($ex,2) ?>,<?= round($ey,2) ?>"
-                              fill="none" stroke="#f0a500" stroke-width="14" stroke-linecap="round"/>
-                        <?php endif; ?>
-                    </svg>
-                </div>
-            </div>
-        </div>
+<div class="dashboard-columns">
+    <div class="dashboard-stack">
+        <section class="dashboard-panel" aria-labelledby="recent-elections-heading">
+            <div class="dashboard-panel-head"><div><h2 id="recent-elections-heading">Recent elections</h2><p>A quick look at your latest election activity.</p></div><a class="dashboard-text-link" href="<?= BASE_URL ?>/admin/elections.php">View all <i class="bi bi-arrow-up-right" aria-hidden="true"></i></a></div>
+            <?php if (empty($elections)): ?>
+            <div class="dashboard-empty"><span class="dashboard-empty-icon"><i class="bi bi-check2-square" aria-hidden="true"></i></span><h3>Your first election starts here.</h3><p>Create an election to bring your campus community together.</p><a class="dashboard-button" href="<?= BASE_URL ?>/admin/election_form.php">Create an election <i class="bi bi-plus-lg" aria-hidden="true"></i></a></div>
+            <?php else: ?>
+            <div class="dashboard-table-scroll"><table class="dashboard-table"><caption class="visually-hidden">The six most recently created elections</caption>
+                <thead><tr><th scope="col">Election</th><th scope="col">Block</th><th scope="col">Status</th><th scope="col">Period</th><th scope="col"><span class="visually-hidden">Actions</span></th></tr></thead>
+                <tbody><?php foreach ($recentElections as $el): ?><tr>
+                    <td><div class="dashboard-election-title"><span class="dashboard-table-icon"><i class="bi bi-check2-square" aria-hidden="true"></i></span><div><strong><?= h($el['title']) ?></strong><small><?= h($el['created_by_name'] ?? 'Campus election') ?></small></div></div></td>
+                    <td><span class="dashboard-block-pill">BSIT <?= h($el['section'] ?? '') ?></span></td>
+                    <td><?= status_badge($el['status']) ?></td>
+                    <td class="dashboard-table-date"><?= h(date('M d', strtotime($el['start_at']))) ?> &ndash; <?= h(date('M d, Y', strtotime($el['end_at']))) ?></td>
+                    <td><a href="<?= BASE_URL ?>/admin/positions.php?election_id=<?= (int) $el['id'] ?>" class="dashboard-icon-link" aria-label="Manage <?= h($el['title']) ?>"><i class="bi bi-arrow-up-right" aria-hidden="true"></i></a></td>
+                </tr><?php endforeach; ?></tbody>
+            </table></div>
+            <?php endif; ?>
+        </section>
 
-        <div class="dark-card">
-            <div class="card-head">
-                BSIT Student Council Turnout
-            </div>
-            <div class="card-body-inner">
-                <?php foreach ($turnoutRows as $row):
-                    $pct   = $row['total'] > 0 ? round(($row['voted'] / $row['total']) * 100) : 0;
-                    $label = $row['section'];
-                    if ($row['track']) $label .= ' ' . $row['track'];
-                    $sub   = $row['voted'] . '/' . $row['total'] . ' voted';
-                ?>
-                <div class="prog-row">
-                    <div class="prog-label">
-                        <span><?= h($label) ?></span>
-                        <span style="color:var(--text-muted);font-size:.72rem;"><?= $sub ?> &nbsp;<strong style="color:#fff;"><?= $pct ?>%</strong></span>
-                    </div>
-                    <div class="prog-bar-track">
-                        <div class="prog-bar-fill" style="width:<?= $pct ?>%"></div>
-                    </div>
-                </div>
-                <?php endforeach; ?>
-                <?php if (empty($turnoutRows)): ?>
-                <p style="color:var(--text-muted);font-size:.82rem;">No block data available.</p>
+        <section class="dashboard-panel" aria-labelledby="activity-heading">
+            <div class="dashboard-panel-head"><div><h2 id="activity-heading">Latest activity</h2><p>Recent updates from your election workspace.</p></div><span class="dashboard-soft-label"><i class="bi bi-clock-history" aria-hidden="true"></i> Status history</span></div>
+            <div class="dashboard-panel-body">
+                <?php if (empty($auditLog)): ?>
+                <div class="dashboard-inline-empty"><i class="bi bi-clock-history" aria-hidden="true"></i><div><strong>A fresh start.</strong><p>Election status updates will appear here.</p></div></div>
+                <?php else: ?>
+                <ol class="dashboard-timeline"><?php foreach ($auditLog as $log): ?><li>
+                    <span class="dashboard-timeline-dot<?= $log['to_status'] === 'open' ? ' is-live' : '' ?>" aria-hidden="true"></span>
+                    <div><p><strong><?= h($log['changed_by_name'] ?? 'System') ?></strong> moved <strong><?= h($log['election_title']) ?></strong> to <?= status_badge($log['to_status']) ?>.</p><time datetime="<?= h(date('c', strtotime($log['changed_at']))) ?>"><?= h(date('M d, Y · g:i A', strtotime($log['changed_at']))) ?></time></div>
+                </li><?php endforeach; ?></ol>
                 <?php endif; ?>
             </div>
-        </div>
+        </section>
     </div>
 
-    <!-- Right: Elections Table + Activity Feed -->
-    <div class="col-lg-7">
-        <div class="dark-card mb-4">
-            <div class="card-head">
-                Elections
-                <a href="<?= BASE_URL ?>/admin/election_form.php" class="btn-gold" style="padding:5px 14px;font-size:.78rem;">
-                    <i class="bi bi-plus-lg"></i> New
-                </a>
+    <div class="dashboard-stack">
+        <section class="dashboard-panel dashboard-participation" aria-labelledby="participation-heading">
+            <div class="dashboard-panel-head"><div><h2 id="participation-heading">Every voice counts.</h2><p>Overall student participation</p></div><i class="bi bi-people dashboard-heading-icon" aria-hidden="true"></i></div>
+            <div class="dashboard-panel-body">
+                <div class="dashboard-turnout-ring" style="--turnout:<?= $ringPct ?>%;" role="img" aria-label="<?= $turnoutPct ?> percent student participation"><div><strong><?= $turnoutPct ?><span>%</span></strong><small>Participation</small></div></div>
+                <div class="dashboard-turnout-totals"><div><span class="dashboard-legend-dot" aria-hidden="true"></span><strong><?= number_format((int) $totalVoted) ?></strong><small>Students who voted</small></div><div><strong><?= number_format((int) $totalVoters) ?></strong><small>Active students</small></div></div>
+                <p class="dashboard-footnote">Based on students with a confirmed vote across all elections.</p>
             </div>
-            <div style="overflow-x:auto;">
-                <table class="dark-table">
-                    <thead>
-                        <tr>
-                            <th>Title</th>
-                            <th>Block</th>
-                            <th>Status</th>
-                            <th>Period</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    <?php if (empty($elections)): ?>
-                        <tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:24px;">No elections yet.</td></tr>
-                    <?php else: foreach ($elections as $el): ?>
-                        <tr>
-                            <td style="font-weight:600;"><?= h($el['title']) ?></td>
-                            <td style="color:var(--text-muted);">BSIT <?= h($el['section'] ?? '') ?></td>
-                            <td><?= status_badge($el['status']) ?></td>
-                            <td style="color:var(--text-muted);font-size:.78rem;">
-                                <?= h(date('M d', strtotime($el['start_at']))) ?> –
-                                <?= h(date('M d', strtotime($el['end_at']))) ?>
-                            </td>
-                            <td>
-                                <a href="<?= BASE_URL ?>/admin/positions.php?election_id=<?= $el['id'] ?>"
-                                   class="btn-sm-icon" title="Manage"><i class="bi bi-gear"></i></a>
-                            </td>
-                        </tr>
-                    <?php endforeach; endif; ?>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+        </section>
 
-        <!-- Real-Time Activity Feed -->
-        <div class="dark-card">
-            <div class="card-head">Real-Time Activity Feed</div>
-            <div class="card-body-inner">
-                <?php if (empty($auditLog)): ?>
-                <p style="color:var(--text-muted);font-size:.82rem;">No activity yet.</p>
-                <?php else: foreach ($auditLog as $log): ?>
-                <div class="feed-item">
-                    <div class="feed-dot <?= $log['to_status'] === 'open' ? 'green' : ($log['to_status'] === 'closed' ? 'gold' : 'red') ?>"></div>
-                    <div>
-                        <div class="feed-text">
-                            <strong><?= h($log['changed_by_name'] ?? 'System') ?></strong>
-                            advanced <em><?= h($log['election_title']) ?></em>
-                            to <strong><?= h($log['to_status']) ?></strong>
-                        </div>
-                        <div class="feed-time"><?= h(date('M d, Y H:i', strtotime($log['changed_at']))) ?></div>
-                    </div>
-                </div>
-                <?php endforeach; endif; ?>
+        <section class="dashboard-panel" aria-labelledby="block-turnout-heading">
+            <div class="dashboard-panel-head"><div><h2 id="block-turnout-heading">Participation by block</h2><p>Turnout in open elections</p></div></div>
+            <div class="dashboard-panel-body dashboard-block-list">
+                <?php foreach ($turnoutRows as $row):
+                    $pct = $row['total'] > 0 ? round(($row['voted'] / $row['total']) * 100) : 0;
+                    $label = 'BSIT ' . $row['section'] . ($row['track'] ? ' · ' . $row['track'] : '');
+                ?>
+                <div class="dashboard-block-progress"><div><strong><?= h($label) ?></strong><span><?= $pct ?>%</span></div><div class="dashboard-progress-track" role="progressbar" aria-label="<?= h($label) ?> turnout" aria-valuenow="<?= max(0, min(100, $pct)) ?>" aria-valuemin="0" aria-valuemax="100"><span style="width:<?= max(0, min(100, $pct)) ?>%;"></span></div><small><?= (int) $row['voted'] ?> of <?= (int) $row['total'] ?> students voted</small></div>
+                <?php endforeach; ?>
+                <?php if (empty($turnoutRows)): ?><p class="dashboard-muted mb-0">Add blocks to see student participation here.</p><?php endif; ?>
             </div>
-        </div>
+        </section>
+
+        <section class="dashboard-quick-links" aria-label="Workspace shortcuts"><span class="dashboard-eyebrow">KEEP THINGS MOVING</span><a href="<?= BASE_URL ?>/admin/students.php"><i class="bi bi-people" aria-hidden="true"></i><span>Manage students<small><?= $pendingCount > 0 ? $pendingCount . ' awaiting verification' : 'Your campus community' ?></small></span><i class="bi bi-arrow-up-right" aria-hidden="true"></i></a><a href="<?= BASE_URL ?>/admin/blocks.php"><i class="bi bi-grid" aria-hidden="true"></i><span>Manage blocks<small>Organize your student groups</small></span><i class="bi bi-arrow-up-right" aria-hidden="true"></i></a></section>
     </div>
 </div>
 

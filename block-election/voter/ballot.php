@@ -73,7 +73,7 @@ require_once dirname(__DIR__) . '/includes/header.php';
                         <input type="checkbox"
                                name="votes[<?= $pos['id'] ?>][]"
                                value="<?= $c['id'] ?>"
-                               class="d-none candidate-checkbox">
+                               class="visually-hidden candidate-checkbox">
                         <?php if ($c['photo_path']): ?>
                         <img src="<?= BASE_URL ?>/<?= h($c['photo_path']) ?>"
                              class="rounded-circle mb-2 candidate-photo-sm" alt="<?= h($c['full_name']) ?>">

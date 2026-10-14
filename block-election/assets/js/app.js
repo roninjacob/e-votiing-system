@@ -16,14 +16,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const position = group.dataset.position;
 
         cards.forEach(card => {
-            card.addEventListener('click', () => {
-                const checkbox = card.querySelector('.candidate-checkbox');
-                const isSelected = card.classList.contains('selected');
+            const checkbox = card.querySelector('.candidate-checkbox');
+            card.classList.toggle('selected', checkbox.checked);
+            checkbox.addEventListener('change', () => {
+                const isSelected = !checkbox.checked;
 
                 if (!isSelected) {
                     // Count currently selected in this group
                     const selectedCount = group.querySelectorAll('.candidate-card.selected').length;
                     if (selectedCount >= max) {
+                        checkbox.checked = false;
                         // Enforce max — flash a brief visual cue instead of alert
                         group.querySelectorAll('.candidate-card:not(.selected)').forEach(c => {
                             c.classList.add('disabled');
@@ -58,6 +60,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!btnConfirm || !btnSubmit || !ballotForm || !summary) return;
 
+    // Keep the dialog above Bootstrap's backdrop, outside the app stacking context.
+    const modalElement = document.getElementById('confirmModal');
+    document.body.appendChild(modalElement);
+    const confirmModal = bootstrap.Modal.getOrCreateInstance(modalElement);
+    let canSubmit = false;
+
     btnConfirm.addEventListener('click', () => {
         // Validate required positions before opening modal
         let valid = true;
@@ -66,7 +74,8 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.candidate-group').forEach(group => {
             const posName  = group.dataset.position;
             const required = group.dataset.required === '1';
-            const selected = group.querySelectorAll('.candidate-card.selected');
+            const selected = [...group.querySelectorAll('.candidate-checkbox:checked')]
+                .map(checkbox => checkbox.closest('.candidate-card'));
 
             if (required && selected.length === 0) {
                 valid = false;
@@ -79,18 +88,21 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
+        canSubmit = valid;
+        btnSubmit.disabled = !valid;
         if (!valid) {
             summary.innerHTML = '<ul class="mb-0">' + lines.join('') + '</ul>'
                 + '<p class="text-danger mt-2 mb-0">Please fix the errors above before submitting.</p>';
-            new bootstrap.Modal(document.getElementById('confirmModal')).show();
+            confirmModal.show();
             return;
         }
 
         summary.innerHTML = '<p>Please review your selections:</p><ul class="mb-0">' + lines.join('') + '</ul>';
-        new bootstrap.Modal(document.getElementById('confirmModal')).show();
+        confirmModal.show();
     });
 
     btnSubmit.addEventListener('click', () => {
+        if (!canSubmit) return;
         // Disable button to prevent double-submit
         btnSubmit.disabled = true;
         btnSubmit.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Submitting…';

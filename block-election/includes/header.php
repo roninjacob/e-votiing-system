@@ -4,6 +4,9 @@ $pageTitle = $pageTitle ?? APP_NAME;
 $user = current_user();
 $currentFile = basename($_SERVER['PHP_SELF']);
 $currentDir  = basename(dirname($_SERVER['PHP_SELF']));
+$isDashboard = ($currentDir === 'admin' && $currentFile === 'dashboard.php')
+    || ($currentDir === 'voter' && $currentFile === 'elections.php');
+$isAdmin = $user && in_array($user['role'], ['admin', 'adviser', 'committee'], true);
 
 function nav_active(string $file, string $dir = ''): string {
     global $currentFile, $currentDir;
@@ -21,33 +24,36 @@ function nav_active(string $file, string $dir = ''): string {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/style.css?v=<?= filemtime(BASE_PATH . '/assets/css/style.css') ?>">
 </head>
-<body>
+<body class="app-page<?= $isDashboard ? ' app-dashboard' : '' ?>">
+<a class="app-skip-link" href="#main-content">Skip to content</a>
 
 <!-- ── Top Banner ── -->
-<div class="top-banner">
-    <div class="logos-group">
+<header class="top-banner app-banner">
+    <div class="app-brand">
+      <div class="logos-group">
         <img src="<?= BASE_URL ?>/assets/img/batstate-logo-main.png?v=<?= filemtime(BASE_PATH . '/assets/img/batstate-logo-main.png') ?>" class="logo" alt="BatStateU" onerror="this.style.display='none'">
         <img src="<?= BASE_URL ?>/assets/img/cics-logo.png?v=<?= filemtime(BASE_PATH . '/assets/img/cics-logo.png') ?>" class="logo" alt="CICS" onerror="this.style.display='none'">
+      </div>
+      <div class="app-brand-title"><strong>CICS E-Voting</strong><span>Batangas State University &middot; ARASOF Campus</span></div>
     </div>
-    <div class="banner-title">CICS E-Voting System — Batangas State University Arasof Campus</div>
-    <div class="logos-group">
-        <img src="<?= BASE_URL ?>/assets/img/sc-logo.png?v=<?= filemtime(BASE_PATH . '/assets/img/sc-logo.png') ?>" class="logo" alt="CICS Student Council" onerror="this.style.display='none'">
+    <div class="app-header-actions">
+        <span class="app-role-pill"><span aria-hidden="true"></span><?= $isAdmin ? h(ucfirst($user['role'])) . ' workspace' : 'Student workspace' ?></span>
+        <img src="<?= BASE_URL ?>/assets/img/student-council-logo.png?v=<?= filemtime(BASE_PATH . '/assets/img/student-council-logo.png') ?>" class="logo" alt="CICS Student Council">
+        <button type="button" class="app-nav-toggle" id="navToggle" aria-controls="appSidebar" aria-expanded="false" aria-label="Open navigation"><i class="bi bi-list" aria-hidden="true"></i></button>
     </div>
-</div>
+</header>
 
 <!-- ── App Layout ── -->
 <div class="app-layout">
 
     <!-- ── Sidebar ── -->
-    <aside class="sidebar">
+    <aside class="sidebar" id="appSidebar" aria-label="Workspace navigation">
         <?php if ($user): ?>
         <div class="sidebar-user">
             <div class="cics-badge">
-                <img src="<?= BASE_URL ?>/assets/img/sc-logo.png?v=<?= filemtime(BASE_PATH . '/assets/img/sc-logo.png') ?>"
-                     style="width:42px;height:42px;object-fit:contain;"
-                     alt="SC" onerror="this.outerHTML='<div class=cics-icon>SC</div>'">
+                <span class="app-user-avatar" aria-hidden="true"><?= h(strtoupper(substr(trim($user['full_name']), 0, 1))) ?></span>
                 <div>
-                    <div class="welcome-name">Welcome, <?= h(explode(' ', $user['full_name'])[0]) ?></div>
+                    <div class="welcome-name"><?= h($user['full_name']) ?></div>
                     <?php if (in_array($user['role'], ['admin','adviser','committee'], true)): ?>
                     <div class="student-id"><?= h(ucfirst($user['role'])) ?> Account</div>
                     <?php else: ?>
@@ -58,9 +64,9 @@ function nav_active(string $file, string $dir = ''): string {
         </div>
         <?php endif; ?>
 
-        <nav class="sidebar-nav">
+        <nav class="sidebar-nav" aria-label="Main navigation">
             <?php if ($user && in_array($user['role'], ['admin','adviser','committee'], true)): ?>
-            <div class="nav-section">Admin</div>
+            <div class="nav-section">Election management</div>
             <a href="<?= BASE_URL ?>/admin/dashboard.php" class="<?= nav_active('dashboard.php','admin') ?>">
                 <i class="bi bi-speedometer2"></i> Election Overview
             </a>
@@ -75,7 +81,7 @@ function nav_active(string $file, string $dir = ''): string {
                 <?php
                 $pendingCount = db()->query("SELECT COUNT(*) FROM users WHERE role='voter' AND is_verified=0")->fetchColumn();
                 if ($pendingCount > 0): ?>
-                <span style="background:#e74c3c;color:#fff;border-radius:10px;padding:1px 7px;font-size:.68rem;font-weight:700;margin-left:auto;"><?= $pendingCount ?></span>
+                <span class="app-nav-count" title="Students awaiting verification"><?= $pendingCount ?></span>
                 <?php endif; ?>
             </a>
             <div class="nav-section">Voter</div>
@@ -83,10 +89,10 @@ function nav_active(string $file, string $dir = ''): string {
 
             <?php if ($user): ?>
             <a href="<?= BASE_URL ?>/voter/elections.php" class="<?= nav_active('elections.php','voter') ?>">
-                <i class="bi bi-clipboard2-check"></i> My Ballot
+                <i class="bi bi-clipboard2-check"></i> <?= $isAdmin ? 'Student elections' : 'My dashboard' ?>
             </a>
-            <a href="<?= BASE_URL ?>/voter/elections.php">
-                <i class="bi bi-bar-chart-line"></i> Live Turnout
+            <a href="<?= BASE_URL ?>/voter/elections.php#student-election-list">
+                <i class="bi bi-check2-square"></i> My Ballot
             </a>
 
 
@@ -97,8 +103,9 @@ function nav_active(string $file, string $dir = ''): string {
             </a>
             <?php endif; ?>
         </nav>
+        <div class="app-sidebar-note"><img src="<?= BASE_URL ?>/assets/img/student-council-logo.png" alt=""><strong>Your campus.<br>Your voice.</strong><span>Building our community,<br>one vote at a time.</span></div>
     </aside>
 
     <!-- ── Main Content ── -->
-    <div class="main-content">
+    <main class="main-content" id="main-content">
         <div class="flash-wrap"><?php render_flash(); ?></div>

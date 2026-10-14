@@ -18,6 +18,12 @@ $positions = $posSvc->getByElection($electionId);
 $statusLog = $electionSvc->getStatusLog($electionId);
 $user      = current_user();
 $isDraft   = $election['status'] === 'draft';
+$transitionLabels = [
+    'draft' => 'Finish Setup',
+    'configured' => 'Open Voting',
+    'open' => 'Close Voting',
+    'closed' => 'Publish Election',
+];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
@@ -72,15 +78,15 @@ require_once dirname(__DIR__) . '/includes/header.php';
         <!-- Status Advance -->
         <?php if (in_array($election['status'], ['draft','configured','open','closed'], true)): ?>
         <div class="dark-card mb-3">
-            <div class="card-body-inner d-flex align-items-center gap-3">
-                <span style="color:var(--text-muted);font-size:.82rem;">Advance status:</span>
-                <form method="post" style="display:flex;gap:8px;align-items:center;" onsubmit="return confirm('Advance election status?')">
+            <div class="card-body-inner d-flex flex-wrap align-items-center gap-3">
+                <span style="color:var(--text-muted);font-size:.82rem;">Finish setup, then open voting to make this election visible to students in its block.</span>
+                <form method="post" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;" onsubmit="return confirm('<?= h($transitionLabels[$election['status']]) ?>?')">
                     <?= csrf_field() ?>
                     <input type="hidden" name="pos_action" value="transition">
                     <input type="text" name="note" class="form-control-dark" style="width:200px;"
                            placeholder="Optional note">
                     <button class="btn-gold" style="padding:7px 16px;">
-                        <i class="bi bi-arrow-right-circle"></i> Advance
+                        <i class="bi bi-arrow-right-circle"></i> <?= h($transitionLabels[$election['status']]) ?>
                     </button>
                 </form>
             </div>

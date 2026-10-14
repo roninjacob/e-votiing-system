@@ -61,89 +61,66 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/style.css?v=<?= filemtime(BASE_PATH . '/assets/css/style.css') ?>">
 </head>
-<body class="login-page">
+<body class="login-page login-page--portal">
 
-<div class="login-banner">
-    <div class="logos-group">
-        <img src="<?= BASE_URL ?>/assets/img/cics-logo.png?v=<?= filemtime(BASE_PATH . '/assets/img/cics-logo.png') ?>"
-             style="height:48px;width:auto;object-fit:contain;"
-             alt="CICS" onerror="this.style.display='none'">
-    </div>
-    <div class="banner-title">CICS E-Voting System — Batangas State University Arasof Campus</div>
-    <div class="logos-group">
-        <img src="<?= BASE_URL ?>/assets/img/sc-logo.png?v=<?= filemtime(BASE_PATH . '/assets/img/sc-logo.png') ?>"
-             style="height:48px;width:auto;object-fit:contain;"
-             alt="CICS Student Council" onerror="this.style.display='none'">
-    </div>
-</div>
+<?php require __DIR__ . '/includes/login_brand.php'; ?>
 
-<div class="flex-grow-1 d-flex align-items-center justify-content-center py-5">
-    <div class="login-card" style="max-width:500px;">
+<main class="portal-main portal-registration">
+    <?php require __DIR__ . '/includes/login_intro.php'; ?>
+    <section class="login-card portal-card" aria-labelledby="registration-heading">
 
     <?php if ($success): ?>
-        <div class="text-center py-3">
-            <div style="width:72px;height:72px;border-radius:50%;background:rgba(46,204,113,.15);border:3px solid #2ecc71;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
-                <i class="bi bi-check-lg" style="font-size:2rem;color:#2ecc71;"></i>
-            </div>
-            <h3 style="color:#fff;margin-bottom:8px;">Account Created!</h3>
-            <p style="color:var(--text-muted);font-size:.85rem;margin-bottom:24px;">
-                Your account is pending verification by your adviser.<br>
-                You will be notified once approved.
-            </p>
-            <a href="<?= BASE_URL ?>/login.php" class="btn-gold" style="padding:11px 32px;">
-                <i class="bi bi-box-arrow-in-right me-1"></i>Go to Login
-            </a>
+        <div class="portal-registration-success" role="status">
+            <div class="portal-account-icon" aria-hidden="true"><i class="bi bi-check-lg"></i></div>
+            <span class="portal-card-kicker">YOU'RE PART OF THE COMMUNITY</span>
+            <h2 id="registration-heading">Account created.</h2>
+            <p>Your account is pending verification by your adviser. Once approved, you can sign in and take part in your block elections.</p>
+            <div class="portal-registration-notice"><i class="bi bi-person-check" aria-hidden="true"></i><span>Need help getting approved? Contact your adviser.</span></div>
+            <a href="<?= BASE_URL ?>/login.php" class="portal-submit">Back to Sign In <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
         </div>
 
     <?php else: ?>
 
-        <div class="text-center mb-4">
-            <div style="display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:14px;">
-                <img src="<?= BASE_URL ?>/assets/img/cics-logo.png?v=<?= filemtime(BASE_PATH . '/assets/img/cics-logo.png') ?>"
-                     style="width:64px;height:64px;object-fit:contain;"
-                     alt="CICS" onerror="this.style.display='none'">
-                <img src="<?= BASE_URL ?>/assets/img/sc-logo.png?v=<?= filemtime(BASE_PATH . '/assets/img/sc-logo.png') ?>"
-                     style="width:64px;height:64px;object-fit:contain;"
-                     alt="SC" onerror="this.style.display='none'">
-            </div>
-            <h3>Create Account</h3>
-            <p style="font-size:.75rem;color:var(--text-muted);">Register with your BatStateU GSuite account</p>
+        <a href="<?= BASE_URL ?>/login.php" class="portal-back-link"><i class="bi bi-arrow-left" aria-hidden="true"></i> Back to sign in</a>
+        <div class="portal-card-heading">
+            <div class="portal-account-icon" aria-hidden="true"><i class="bi bi-person-plus"></i></div>
+            <span class="portal-card-kicker">JOIN THE CICS COMMUNITY</span>
+            <h2 id="registration-heading">Your voice belongs here.</h2>
+            <p>Create your student account to get started.</p>
         </div>
 
         <?php if (!empty($errors)): ?>
-        <div style="background:rgba(192,57,43,.15);border:1px solid rgba(192,57,43,.4);border-radius:8px;padding:10px 14px;font-size:.83rem;color:#e74c3c;margin-bottom:16px;">
+        <div class="portal-error" role="alert">
             <?php foreach ($errors as $err): ?>
             <div><i class="bi bi-exclamation-circle me-1"></i><?= h($err) ?></div>
             <?php endforeach; ?>
         </div>
         <?php endif; ?>
 
-        <form method="post" autocomplete="off" id="regForm">
+        <form method="post" id="regForm">
             <?= csrf_field() ?>
+            <div class="portal-form-section"><span>Student details</span><small>All fields are required</small></div>
 
             <!-- GSuite Email -->
             <div class="mb-3">
-                <label class="form-label-dark">GSuite Email <span style="color:#e74c3c;">*</span></label>
+                <label class="form-label-dark" for="emailField">GSuite email</label>
                 <div style="position:relative;">
                     <i class="bi bi-envelope" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);"></i>
-                    <input type="email" name="email" id="emailField" class="form-control-dark"
+                    <input type="email" name="email" id="emailField" class="form-control-dark" autocomplete="username" aria-describedby="emailHint"
                            style="padding-left:36px;"
                            value="<?= h($_POST['email'] ?? '') ?>"
                            placeholder="23-01041@g.batstate-u.edu.ph"
-                           required autofocus>
+                           required>
                 </div>
-                <div style="font-size:.7rem;color:var(--text-muted);margin-top:4px;">
-                    Format: <code style="color:var(--gold);">YY-NNNNN@g.batstate-u.edu.ph</code>
-                    — your student ID is extracted automatically.
-                </div>
+                <p class="portal-field-hint" id="emailHint">Use the GSuite email issued by BatStateU.</p>
             </div>
 
             <!-- Full Name -->
             <div class="mb-3">
-                <label class="form-label-dark">Full Name <span style="color:#e74c3c;">*</span></label>
+                <label class="form-label-dark" for="fullNameField">Full name</label>
                 <div style="position:relative;">
                     <i class="bi bi-person" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);"></i>
-                    <input type="text" name="full_name" class="form-control-dark"
+                    <input type="text" name="full_name" id="fullNameField" class="form-control-dark" autocomplete="name"
                            style="padding-left:36px;"
                            value="<?= h($_POST['full_name'] ?? '') ?>"
                            placeholder="Last Name, First Name M.I."
@@ -153,10 +130,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <!-- Year Level (drives track visibility) -->
             <div class="mb-3">
-                <label class="form-label-dark">Year Level <span style="color:#e74c3c;">*</span></label>
+                <label class="form-label-dark" for="yearSelect">Year level</label>
                 <div style="position:relative;">
                     <i class="bi bi-mortarboard" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);z-index:1;"></i>
-                    <select id="yearSelect" class="form-control-dark" style="padding-left:36px;">
+                    <select id="yearSelect" class="form-control-dark" style="padding-left:36px;" required>
                         <option value="">— Select year level —</option>
                         <?php foreach ($yearLevels as $yr): ?>
                         <option value="<?= $yr ?>"><?= 'Year ' . $yr ?></option>
@@ -165,32 +142,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
             </div>
 
-            <!-- Track (Year 3 only) -->
+            <!-- Specialization for Years 3 and 4 -->
             <div class="mb-3" id="trackRow" style="display:none;">
-                <label class="form-label-dark">Specialization Track <span style="color:#e74c3c;">*</span></label>
-                <div style="display:flex;gap:10px;">
-                    <label id="trackBA" class="track-option" onclick="selectTrack('BA')"
-                           style="flex:1;padding:12px;border:2px solid var(--card-border);border-radius:8px;cursor:pointer;text-align:center;transition:all .15s;">
-                        <i class="bi bi-graph-up-arrow" style="font-size:1.4rem;display:block;margin-bottom:4px;color:var(--gold);"></i>
-                        <div style="font-size:.82rem;font-weight:700;color:#fff;">Business Analytics</div>
-                        <div style="font-size:.7rem;color:var(--text-muted);">BA Track</div>
-                    </label>
-                    <label id="trackNT" class="track-option" onclick="selectTrack('NT')"
-                           style="flex:1;padding:12px;border:2px solid var(--card-border);border-radius:8px;cursor:pointer;text-align:center;transition:all .15s;">
-                        <i class="bi bi-hdd-network" style="font-size:1.4rem;display:block;margin-bottom:4px;color:var(--gold);"></i>
-                        <div style="font-size:.82rem;font-weight:700;color:#fff;">Networking</div>
-                        <div style="font-size:.7rem;color:var(--text-muted);">NT Track</div>
-                    </label>
+                <span class="form-label-dark" id="trackLabel">Specialization track</span>
+                <div class="portal-track-options" role="group" aria-labelledby="trackLabel">
+                    <button type="button" id="trackBA" class="track-option" onclick="selectTrack('BA')" aria-pressed="false">
+                        <i class="bi bi-graph-up-arrow" aria-hidden="true"></i><strong>Business Analytics</strong><small>BA Track</small>
+                    </button>
+                    <button type="button" id="trackNT" class="track-option" onclick="selectTrack('NT')" aria-pressed="false">
+                        <i class="bi bi-hdd-network" aria-hidden="true"></i><strong>Networking</strong><small>NT Track</small>
+                    </button>
                 </div>
                 <input type="hidden" id="selectedTrack" value="">
             </div>
 
             <!-- Block Section -->
             <div class="mb-3" id="blockRow" style="display:none;">
-                <label class="form-label-dark">Block Section <span style="color:#e74c3c;">*</span></label>
+                <label class="form-label-dark" for="blockSelect">Block section</label>
                 <div style="position:relative;">
                     <i class="bi bi-grid" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);z-index:1;"></i>
-                    <select name="block_id" id="blockSelect" class="form-control-dark" style="padding-left:36px;" required>
+                    <select name="block_id" id="blockSelect" class="form-control-dark" style="padding-left:36px;" required disabled>
                         <option value="">— Select your block —</option>
                         <?php
                         // Track sequential block number per year+semester+track group
@@ -210,21 +181,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <?php endforeach; ?>
                     </select>
                 </div>
-                <div style="font-size:.7rem;color:var(--text-muted);margin-top:4px;">
-                    Section code: <code style="color:var(--gold);">YSBB</code>
-                    — Y=Year · S=Semester · BB=Block No.
-                </div>
+                <p class="portal-field-hint">Choose the section you are currently enrolled in.</p>
             </div>
 
+            <div class="portal-form-section portal-form-section--security"><span>Account security</span><i class="bi bi-lock" aria-hidden="true"></i></div>
             <!-- Password -->
             <div class="mb-3">
-                <label class="form-label-dark">Password <span style="color:#e74c3c;">*</span></label>
+                <label class="form-label-dark" for="pwd1">Password</label>
                 <div style="position:relative;">
                     <i class="bi bi-lock" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);"></i>
-                    <input type="password" name="password" id="pwd1" class="form-control-dark"
+                    <input type="password" name="password" id="pwd1" class="form-control-dark" autocomplete="new-password"
                            style="padding-left:36px;padding-right:40px;"
                            placeholder="Minimum 8 characters" required minlength="8">
-                    <button type="button" onclick="togglePwd('pwd1','eye1')"
+                    <button type="button" onclick="togglePwd('pwd1','eye1',this)" aria-label="Show password" aria-pressed="false"
                             style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;padding:0;">
                         <i class="bi bi-eye" id="eye1"></i>
                     </button>
@@ -233,40 +202,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <!-- Confirm Password -->
             <div class="mb-4">
-                <label class="form-label-dark">Confirm Password <span style="color:#e74c3c;">*</span></label>
+                <label class="form-label-dark" for="pwd2">Confirm password</label>
                 <div style="position:relative;">
                     <i class="bi bi-lock-fill" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);"></i>
-                    <input type="password" name="password2" id="pwd2" class="form-control-dark"
+                    <input type="password" name="password2" id="pwd2" class="form-control-dark" autocomplete="new-password" aria-describedby="pwdMatch"
                            style="padding-left:36px;padding-right:40px;"
                            placeholder="Re-enter your password" required>
-                    <button type="button" onclick="togglePwd('pwd2','eye2')"
+                    <button type="button" onclick="togglePwd('pwd2','eye2',this)" aria-label="Show confirm password" aria-pressed="false"
                             style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;padding:0;">
                         <i class="bi bi-eye" id="eye2"></i>
                     </button>
                 </div>
-                <div id="pwdMatch" style="font-size:.72rem;margin-top:4px;"></div>
+                <div id="pwdMatch" class="portal-field-hint" aria-live="polite"></div>
             </div>
 
-            <button type="submit" class="btn-gold w-100 justify-content-center" style="padding:12px;font-size:.9rem;">
-                <i class="bi bi-person-plus me-1"></i>Create Account
+            <button type="submit" class="portal-submit">Create Account <i class="bi bi-arrow-right" aria-hidden="true"></i>
             </button>
         </form>
 
-        <div style="text-align:center;margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.08);">
-            <span style="font-size:.8rem;color:var(--text-muted);">Already have an account? </span>
-            <a href="<?= BASE_URL ?>/login.php" style="font-size:.8rem;color:var(--gold);text-decoration:none;font-weight:700;">Log In</a>
+        <div class="portal-registration-notice"><i class="bi bi-person-check" aria-hidden="true"></i><span>Your adviser will verify your account before you can vote.</span></div>
+        <div class="portal-card-note">
+            <span>Already have an account? </span>
+            <a href="<?= BASE_URL ?>/login.php" class="portal-link">Sign In</a>
         </div>
 
     <?php endif; ?>
-    </div>
-</div>
+    </section>
+</main>
 
-<footer style="background:rgba(0,0,0,0.5);border-top:1px solid rgba(255,255,255,0.07);padding:10px 24px;text-align:center;position:relative;z-index:1;">
-    <span style="font-size:.72rem;color:#9aa0b0;">@batstateu &nbsp;|&nbsp; Leading Innovations, Transforming Lives, Building the Nation</span>
+<footer class="portal-footer">
+    <span>CICS &middot; BatStateU ARASOF</span>
+    <span>Leading Innovations. Transforming Lives. Building the Nation.</span>
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+<?php if (!$success): ?>
 const yearSelect    = document.getElementById('yearSelect');
 const trackRow      = document.getElementById('trackRow');
 const blockRow      = document.getElementById('blockRow');
@@ -280,6 +251,7 @@ yearSelect.addEventListener('change', function () {
     activeTrack = '';
     selectedTrack.value = '';
     resetTrackUI();
+    blockSelect.disabled = true;
 
     if (!yr) {
         trackRow.style.display = 'none';
@@ -294,6 +266,7 @@ yearSelect.addEventListener('change', function () {
         trackRow.style.display = 'none';
         filterBlocks(yr, '');
         blockRow.style.display = 'block';
+        blockSelect.disabled = false;
     }
 });
 
@@ -303,25 +276,21 @@ function selectTrack(track) {
     resetTrackUI();
 
     const yr = yearSelect.value;
-    const ba = document.getElementById('trackBA');
-    const nt = document.getElementById('trackNT');
-
-    if (track === 'BA') {
-        ba.style.borderColor = 'var(--teal-light)';
-        ba.style.background  = 'rgba(61,191,184,.1)';
-    } else {
-        nt.style.borderColor = 'var(--teal-light)';
-        nt.style.background  = 'rgba(61,191,184,.1)';
+    const chosen = document.getElementById('track' + track);
+    if (chosen) {
+        chosen.classList.add('is-selected');
+        chosen.setAttribute('aria-pressed', 'true');
     }
 
     filterBlocks(yr, track);
     blockRow.style.display = 'block';
+    blockSelect.disabled = false;
 }
 
 function resetTrackUI() {
     ['trackBA','trackNT'].forEach(id => {
         const el = document.getElementById(id);
-        if (el) { el.style.borderColor = 'var(--card-border)'; el.style.background = 'transparent'; }
+        if (el) { el.classList.remove('is-selected'); el.setAttribute('aria-pressed', 'false'); }
     });
     blockSelect.value = '';
 }
@@ -332,25 +301,34 @@ function filterBlocks(year, track) {
         const matchYear  = opt.dataset.year  === year;
         const matchTrack = track === '' ? opt.dataset.track === '' : opt.dataset.track === track;
         opt.style.display = (matchYear && matchTrack) ? '' : 'none';
+        opt.disabled = !(matchYear && matchTrack);
     });
     blockSelect.value = '';
 }
 
 // Password helpers
-function togglePwd(id, iconId) {
+function togglePwd(id, iconId, button) {
     const f = document.getElementById(id);
     const i = document.getElementById(iconId);
     f.type = f.type === 'password' ? 'text' : 'password';
     i.className = f.type === 'password' ? 'bi bi-eye' : 'bi bi-eye-slash';
+    const field = id === 'pwd2' ? 'confirm password' : 'password';
+    button.setAttribute('aria-label', (f.type === 'password' ? 'Show ' : 'Hide ') + field);
+    button.setAttribute('aria-pressed', f.type === 'text' ? 'true' : 'false');
 }
 
-document.getElementById('pwd2').addEventListener('input', function () {
+function updatePasswordMatch() {
+    const confirmPassword = document.getElementById('pwd2');
     const msg = document.getElementById('pwdMatch');
-    if (!this.value) { msg.textContent = ''; return; }
-    msg.innerHTML = this.value === document.getElementById('pwd1').value
-        ? '<span style="color:#2ecc71;"><i class="bi bi-check-circle me-1"></i>Passwords match</span>'
-        : '<span style="color:#e74c3c;"><i class="bi bi-x-circle me-1"></i>Passwords do not match</span>';
-});
+    if (!confirmPassword.value) { msg.textContent = ''; msg.classList.remove('is-match', 'is-mismatch'); confirmPassword.setCustomValidity(''); return; }
+    const matches = confirmPassword.value === document.getElementById('pwd1').value;
+    msg.textContent = matches ? 'Passwords match' : 'Passwords do not match';
+    msg.classList.toggle('is-match', matches);
+    msg.classList.toggle('is-mismatch', !matches);
+    confirmPassword.setCustomValidity(matches ? '' : 'Passwords do not match.');
+}
+document.getElementById('pwd1').addEventListener('input', updatePasswordMatch);
+document.getElementById('pwd2').addEventListener('input', updatePasswordMatch);
 
 // Restore state on validation error (POST back)
 <?php if (!empty($_POST['block_id'])): ?>
@@ -366,9 +344,11 @@ document.getElementById('pwd2').addEventListener('input', function () {
     } else {
         filterBlocks(yr, '');
         blockRow.style.display = 'block';
+        blockSelect.disabled = false;
     }
     blockSelect.value = '<?= (int)($_POST['block_id'] ?? 0) ?>';
 })();
+<?php endif; ?>
 <?php endif; ?>
 </script>
 </body>

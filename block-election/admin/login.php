@@ -57,79 +57,61 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/style.css?v=<?= filemtime(BASE_PATH . '/assets/css/style.css') ?>">
 </head>
-<body class="login-page">
+<body class="login-page login-page--portal">
 
-<!-- Banner -->
-<div class="login-banner">
-    <div class="logos-group">
-        <img src="<?= BASE_URL ?>/assets/img/batstate-logo-main.png?v=<?= filemtime(BASE_PATH . '/assets/img/batstate-logo-main.png') ?>"
-             style="height:48px;width:auto;object-fit:contain;"
-             alt="BatStateU" onerror="this.style.display='none'">
-        <img src="<?= BASE_URL ?>/assets/img/cics-logo.png?v=<?= filemtime(BASE_PATH . '/assets/img/cics-logo.png') ?>"
-             style="height:48px;width:auto;object-fit:contain;"
-             alt="CICS" onerror="this.style.display='none'">
-    </div>
-    <div class="banner-title">CICS E-Voting System — Batangas State University Arasof Campus</div>
-    <div class="logos-group">
-        <img src="<?= BASE_URL ?>/assets/img/sc-logo.png?v=<?= filemtime(BASE_PATH . '/assets/img/sc-logo.png') ?>"
-             style="height:48px;width:auto;object-fit:contain;"
-             alt="CICS Student Council" onerror="this.style.display='none'">
-    </div>
-</div>
+<?php require __DIR__ . '/../includes/login_brand.php'; ?>
 
-<div class="flex-grow-1 d-flex align-items-center justify-content-center py-5">
-    <div class="login-card" style="max-width:440px;">
+<main class="portal-main">
+    <?php require __DIR__ . '/../includes/login_intro.php'; ?>
+    <section class="login-card portal-card" aria-labelledby="login-heading">
 
         <!-- Tab Toggle -->
-        <div style="display:flex;gap:0;margin-bottom:28px;border:1px solid var(--card-border);border-radius:8px;overflow:hidden;">
-            <a href="<?= BASE_URL ?>/login.php"
-               style="flex:1;padding:10px;text-align:center;font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;background:transparent;color:var(--text-muted);text-decoration:none;">
+        <nav class="portal-tabs" aria-label="Choose your account type">
+            <a href="<?= BASE_URL ?>/login.php">
                 <i class="bi bi-person-fill me-1"></i>Student
             </a>
-            <a href="<?= BASE_URL ?>/admin/login.php"
-               style="flex:1;padding:10px;text-align:center;font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;background:var(--gold);color:#fff;text-decoration:none;">
+            <a href="<?= BASE_URL ?>/admin/login.php" class="active" aria-current="page">
                 <i class="bi bi-shield-lock me-1"></i>Admin
             </a>
-        </div>
+        </nav>
 
         <!-- Logo -->
-        <div class="text-center mb-4">
-            <div style="width:80px;height:80px;border-radius:50%;background:rgba(192,57,43,.2);border:3px solid #c0392b;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
-                <i class="bi bi-shield-lock-fill" style="font-size:2rem;color:#e74c3c;"></i>
-            </div>
-            <h3>Admin Login</h3>
-            <p style="font-size:.75rem;color:var(--text-muted);">Restricted — Authorized Personnel Only</p>
+        <div class="portal-card-heading">
+            <div class="portal-account-icon" aria-hidden="true"><i class="bi bi-shield-lock"></i></div>
+            <span class="portal-card-kicker">ADMINISTRATOR ACCESS</span>
+            <h2 id="login-heading">Welcome back.</h2>
+            <p>Sign in to manage your campus elections.</p>
         </div>
 
         <?php if ($error): ?>
-        <div style="background:rgba(192,57,43,.15);border:1px solid rgba(192,57,43,.4);border-radius:8px;padding:10px 14px;font-size:.83rem;color:#e74c3c;margin-bottom:16px;">
+        <div class="portal-error" role="alert">
             <i class="bi bi-exclamation-circle me-1"></i><?= h($error) ?>
         </div>
         <?php endif; ?>
 
-        <form method="post" autocomplete="off">
+        <form method="post">
             <?= csrf_field() ?>
 
             <div class="mb-3">
-                <label class="form-label-dark">Admin Email</label>
+                <label class="form-label-dark" for="emailField">Admin email</label>
                 <div style="position:relative;">
                     <i class="bi bi-envelope" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);"></i>
-                    <input type="email" name="email" class="form-control-dark"
+                    <input type="email" name="email" id="emailField" class="form-control-dark" autocomplete="username"
                            style="padding-left:36px;"
                            value="<?= h($_POST['email'] ?? '') ?>"
                            placeholder="admin@cics.batstate-u.edu.ph"
-                           required autofocus>
+                           required>
                 </div>
             </div>
 
             <div class="mb-2">
-                <label class="form-label-dark">Password</label>
+                <label class="form-label-dark" for="pwdField">Password</label>
                 <div style="position:relative;">
                     <i class="bi bi-lock" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);"></i>
-                    <input type="password" name="password" id="pwdField" class="form-control-dark"
+                    <input type="password" name="password" id="pwdField" class="form-control-dark" autocomplete="current-password"
                            style="padding-left:36px;padding-right:40px;"
                            placeholder="Enter your password" required>
-                    <button type="button" onclick="togglePwd()"
+                    <button type="button" onclick="togglePwd(this)" aria-label="Show password" aria-pressed="false"
                             style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;padding:0;">
                         <i class="bi bi-eye" id="eyeIcon"></i>
                     </button>
@@ -137,38 +119,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
 
             <div class="text-end mb-4">
-                <a href="<?= BASE_URL ?>/forgot_password.php?admin=1"
-                   style="font-size:.75rem;color:var(--gold);text-decoration:none;">
+                <a href="<?= BASE_URL ?>/forgot_password.php?admin=1" class="portal-link">
                     Forgot Password?
                 </a>
             </div>
 
-            <button type="submit" class="btn-red w-100 justify-content-center" style="padding:12px;font-size:.9rem;">
-                <i class="bi bi-shield-lock me-1"></i>Admin Sign In
+            <button type="submit" class="portal-submit">
+                Admin Sign In <i class="bi bi-arrow-right" aria-hidden="true"></i>
             </button>
         </form>
 
-        <div style="margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.08);font-size:.75rem;color:var(--text-muted);text-align:center;">
-            <i class="bi bi-info-circle me-1"></i>
-            Admin accounts are created by the system administrator only.
+        <div class="portal-card-note">
+            <i class="bi bi-lock" aria-hidden="true"></i>
+            For authorized administrators, advisers, and committee members.
         </div>
 
-    </div>
-</div>
+    </section>
+</main>
 
-<footer style="background:rgba(0,0,0,0.5);border-top:1px solid rgba(255,255,255,0.07);padding:10px 24px;text-align:center;position:relative;z-index:1;">
-    <span style="font-size:.72rem;color:#9aa0b0;">
-        @batstateu &nbsp;|&nbsp; Leading Innovations, Transforming Lives, Building the Nation
-    </span>
+<footer class="portal-footer">
+    <span>CICS &middot; BatStateU ARASOF</span>
+    <span>Leading Innovations. Transforming Lives. Building the Nation.</span>
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-function togglePwd() {
+function togglePwd(button) {
     const f = document.getElementById('pwdField');
     const i = document.getElementById('eyeIcon');
     if (f.type === 'password') { f.type = 'text';     i.className = 'bi bi-eye-slash'; }
     else                       { f.type = 'password'; i.className = 'bi bi-eye'; }
+    button.setAttribute('aria-label', f.type === 'text' ? 'Hide password' : 'Show password');
+    button.setAttribute('aria-pressed', f.type === 'text' ? 'true' : 'false');
 }
 </script>
 </body>

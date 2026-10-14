@@ -105,8 +105,12 @@ class BlockEligibilityService
 
     private function cache(int $voterId, int $electionId): void
     {
+        // Production uses MySQL/MariaDB; isolated tests use SQLite.
+        $insert = $this->db->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite'
+            ? 'INSERT OR IGNORE'
+            : 'INSERT IGNORE';
         $stmt = $this->db->prepare(
-            'INSERT OR IGNORE INTO block_eligibility_cache (election_id, voter_id, block_id)
+            $insert . ' INTO block_eligibility_cache (election_id, voter_id, block_id)
              SELECT ?, ?, block_id FROM block_elections WHERE id = ?'
         );
         $stmt->execute([$electionId, $voterId, $electionId]);

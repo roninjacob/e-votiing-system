@@ -7,6 +7,12 @@ require_role(['admin', 'adviser', 'committee']);
 
 $svc       = new BlockElectionService();
 $elections = $svc->getAll();
+$transitionLabels = [
+    'draft' => 'Finish Setup',
+    'configured' => 'Open Voting',
+    'open' => 'Close Voting',
+    'closed' => 'Publish Election',
+];
 
 function status_badge(string $status): string {
     $cls = ['draft'=>'badge-draft','configured'=>'badge-configured','open'=>'badge-open','closed'=>'badge-closed','published'=>'badge-published'];
@@ -30,6 +36,11 @@ require_once dirname(__DIR__) . '/includes/header.php';
 </div>
 
 <div class="dark-card">
+    <div class="card-body-inner">
+        Add positions and active candidates, then click <strong>Finish Setup</strong> and
+        <strong>Open Voting</strong>. Open elections appear in My Ballot for students in the assigned block.
+        Publishing is the final step after voting closes.
+    </div>
     <div style="overflow-x:auto;">
         <table class="dark-table">
             <thead>
@@ -55,7 +66,7 @@ require_once dirname(__DIR__) . '/includes/header.php';
                     <td style="color:var(--text-muted);font-size:.78rem;"><?= h(date('M d, Y', strtotime($el['start_at']))) ?></td>
                     <td style="color:var(--text-muted);font-size:.78rem;"><?= h(date('M d, Y', strtotime($el['end_at']))) ?></td>
                     <td>
-                        <div style="display:flex;gap:6px;align-items:center;">
+                        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
                             <a href="<?= BASE_URL ?>/admin/positions.php?election_id=<?= $el['id'] ?>"
                                class="btn-sm-icon" title="Manage Positions"><i class="bi bi-diagram-3"></i></a>
 
@@ -69,12 +80,12 @@ require_once dirname(__DIR__) . '/includes/header.php';
 
                             <?php if (in_array($el['status'], ['draft','configured','open','closed'], true)): ?>
                             <form method="post" action="<?= BASE_URL ?>/admin/election_action.php"
-                                  style="display:inline;" onsubmit="return confirm('Advance election status?')">
+                                  style="display:inline;" onsubmit="return confirm('<?= h($transitionLabels[$el['status']]) ?>?')">
                                 <?= csrf_field() ?>
                                 <input type="hidden" name="action" value="transition">
                                 <input type="hidden" name="id" value="<?= $el['id'] ?>">
-                                <button class="btn-sm-icon" title="Advance Status" style="color:#2ecc71;border-color:#2ecc71;">
-                                    <i class="bi bi-arrow-right-circle"></i>
+                                <button type="submit" class="btn-gold" style="white-space:nowrap;">
+                                    <i class="bi bi-arrow-right-circle"></i> <?= h($transitionLabels[$el['status']]) ?>
                                 </button>
                             </form>
                             <?php endif; ?>
